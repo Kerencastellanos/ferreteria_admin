@@ -1,5 +1,6 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { CrearProducto } from "../pages";
+import { CrearProducto, ResumenVentas } from "../pages";
+
 
 const Tabs = createBottomTabNavigator();
 
@@ -8,7 +9,7 @@ export function Tabsmenu() {
     <Tabs.Navigator>
       <Tabs.Screen name="CrearProducto" component={CrearProducto} />
       <Tabs.Screen name="Clientes" component={CrearProducto} />
-      <Tabs.Screen name="Ventas" component={CrearProducto} />
+      <Tabs.Screen name="Ventas" component={ResumenVentas} />
     </Tabs.Navigator>
   );
 }
