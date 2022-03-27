@@ -1,7 +1,7 @@
 import {
     Alert,
     Text,
-    StyleSheet,
+    StyleSheet,  
     View,
     ActivityIndicator,
     TouchableOpacity,
