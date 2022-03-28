@@ -36,15 +36,11 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    axios.interceptors.response.use(
-      (res) => {
-        return res;
-      },
-      (error) => {
-        checkAuth();
-        return Promise.reject(error);
+    axios.interceptors.response.use((res) => {
+      if (res.data.error && res.data.error.includes("jwt")) {
       }
-    );
+      return res;
+    });
     CheckTokens();
   }, []);
 
