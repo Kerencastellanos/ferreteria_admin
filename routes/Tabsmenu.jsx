@@ -10,6 +10,15 @@ export function Tabsmenu() {
       <Tabs.Screen
         options={{
           tabBarIcon: ({ size, color }) => (
+            <AntDesign name="creditcard" size={size} color={color} />
+          ),
+        }}
+        name="Ventas"
+        component={ResumenVentas}
+      />
+      <Tabs.Screen
+        options={{
+          tabBarIcon: ({ size, color }) => (
             <AntDesign name="pluscircleo" size={size} color={color} />
           ),
         }}
@@ -24,15 +33,6 @@ export function Tabsmenu() {
         }}
         name="Clientes"
         component={Clientes}
-      />
-      <Tabs.Screen
-        options={{
-          tabBarIcon: ({ size, color }) => (
-            <AntDesign name="creditcard" size={size} color={color} />
-          ),
-        }}
-        name="Ventas"
-        component={ResumenVentas}
       />
     </Tabs.Navigator>
   );

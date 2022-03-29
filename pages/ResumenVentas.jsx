@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { StyleSheet, View, FlatList } from "react-native";
+import { Image, Text, StyleSheet, View, FlatList } from "react-native";
 
 export function ResumenVentas() {
   useEffect(() => {
@@ -8,23 +8,59 @@ export function ResumenVentas() {
   }, []);
 
   const [ventas, setVentas] = useState([]);
+  const [cargando, setCargando] = useState(false);
   async function obtenerVentas() {
+    setCargando(true);
     const { data } = await axios.get("/ventas/listar");
+    console.log(data.ventas[0]);
+    setCargando(false);
     setVentas(data.ventas);
   }
 
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={ventas}
-        keyExtractor={(item) => item.id}
-        renderItem={() => (
+    <FlatList
+      refreshing={cargando}
+      contentContainerStyle={{ padding: 15 }}
+      onRefresh={obtenerVentas}
+      data={ventas}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <View
+          style={{
+            flexDirection: "row",
+            marginVertical: 15,
+            justifyContent: "space-between",
+          }}
+        >
+          <Image
+            source={{
+              uri: item.detalles[0].producto.imagenes[0].url,
+              width: 50,
+              height: 50,
+            }}
+          />
           <View>
-            <Text>Ventas</Text>
+            <Text>{item.cliente.nombre}</Text>
+            <Text>
+              {item.detalles.reduce((prev, c) => prev + c.cantidad, 0)} Items
+            </Text>
+            <Text>{new Date(item.fecha).toLocaleString()}</Text>
           </View>
-        )}
-      />
-    </View>
+          <View>
+            <Text>
+              LPS.
+              {item.detalles.reduce(
+                (prev, c) => prev + c.cantidad * c.precio,
+                0
+              )}
+            </Text>
+            <Text style={{ color: item.entregado ? "green" : "red" }}>
+              {item.entregado ? "Entregado" : "No entregado"}
+            </Text>
+          </View>
+        </View>
+      )}
+    />
   );
 }
 const styles = StyleSheet.create({

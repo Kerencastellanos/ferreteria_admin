@@ -35,28 +35,35 @@ export function Cliente({ route }) {
   // renderizar
 
   return (
-    <ScrollView
-      style={{ padding: 10, backgroundColor: "white" }}
-      contentContainerStyle={{ alignItems: "center" }}
-    >
-      {imagenUrl ? (
-        <View
-          style={{
+    <ScrollView style={{ padding: 10, backgroundColor: "white" }}>
+      <View
+        style={[
+          {
+            alignSelf: "center",
+          },
+          imagenUrl && {
             borderRadius: 100,
             borderColor: "#f3f3f3",
             borderWidth: 1,
-          }}
-        >
+          },
+        ]}
+      >
+        {imagenUrl ? (
           <Image
             source={{ uri: imagenUrl, width: 200, height: 200 }}
             style={{
               borderRadius: 100,
             }}
           />
-        </View>
-      ) : (
-        <MaterialIcons name="account-circle" size={200} color="#3495eb" />
-      )}
+        ) : (
+          <MaterialIcons
+            name="account-circle"
+            size={200}
+            color="#3495eb"
+            style={{ padding: 0 }}
+          />
+        )}
+      </View>
       <View>
         <Text>Nombre:</Text>
         <TextInput disabled value={nombre} />
