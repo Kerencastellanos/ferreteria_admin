@@ -12,7 +12,8 @@ export const AuthContext = createContext({
   gotoLogin: false,
   setUser(user) {},
   user: { name: "", email: "", imageUrl: "" },
-  checkAuth() {},
+  async checkAuth() {},
+  async refreshToken() {},
 });
 
 export function AuthProvider({ children }) {
@@ -21,13 +22,37 @@ export function AuthProvider({ children }) {
   const [aToken, setAToken] = useState("");
   const [rToken, setRToken] = useState("");
   const [isAuth, setIsAuth] = useState(false);
+
   useEffect(() => {
     axios.defaults.headers = {
       Authentication: aToken,
     };
-    checkAuth();
+  }, [aToken]);
+
+  useEffect(() => {
     saveTokens();
   }, [aToken, rToken]);
+
+  useEffect(() => {
+    if (rToken) {
+      axios.interceptors.response.use(async (res) => {
+        if (res.data.error && res.data.error.includes("jwt")) {
+          console.log("interceptors ");
+          console.log(res.data.error);
+          console.log("rToken:", rToken);
+          const atoken = await refreshToken();
+          console.log(res.config.data);
+          return await axios.request({
+            ...res.config,
+            headers: { Authentication: atoken },
+          });
+        }
+        return res;
+      });
+    }
+    checkAuth();
+  }, [rToken]);
+
   async function saveTokens() {
     if (aToken && rToken) {
       AsyncStorage.setItem("aToken", aToken);
@@ -36,14 +61,26 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
-    axios.interceptors.response.use((res) => {
-      if (res.data.error && res.data.error.includes("jwt")) {
-      }
-      return res;
-    });
     CheckTokens();
   }, []);
 
+  async function refreshToken() {
+    if (!rToken) {
+      console.log("No hay rToken");
+      return;
+    }
+    console.log("refresh Token ", rToken);
+    const { data } = await axios.post("/auth/refresh", {
+      refreshToken: rToken,
+    });
+    console.log("data2: ", data);
+    if (data.accessToken) {
+      console.log("new AToken");
+      setAToken(data.accessToken);
+      return data.accessToken;
+    }
+    setGotoLogin(true);
+  }
   async function CheckTokens() {
     const a_Token = await AsyncStorage.getItem("aToken");
     const r_Token = await AsyncStorage.getItem("rToken");
@@ -54,37 +91,27 @@ export function AuthProvider({ children }) {
       setRToken(r_Token);
     }
   }
-
   async function checkAuth() {
-    console.log("rToken: ", rToken);
+    console.log("checkAuth-rToken: ", rToken);
     if (rToken) {
       console.log("checkAuth");
       try {
         const { data } = await axios.get("/usuarios/me");
 
-        console.log("data: ", data);
+        console.log("checkAuth-data: ", data);
         if (data.usuario) {
           console.log("auth true");
           setUser(data.usuario);
           setIsAuth(true);
+
           return;
         }
-        console.log("refresh Token");
-        const { data: data2 } = await axios.post("/auth/refresh", {
-          refreshToken: rToken,
-        });
-        console.log("data2: ", data2);
-        if (data2.accessToken) {
-          console.log("new AToken");
-          setAToken(data2.accessToken);
-          return;
-        }
-        setGotoLogin(true);
       } catch (error) {
         console.warn(error);
       }
       return;
     }
+    console.log("auth false");
     setIsAuth(false);
   }
 
@@ -101,6 +128,7 @@ export function AuthProvider({ children }) {
         setAToken,
         setRToken,
         checkAuth,
+        refreshToken,
       }}
     >
       {children}

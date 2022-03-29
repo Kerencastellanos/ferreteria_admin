@@ -3,11 +3,10 @@ import { useState, useContext } from "react";
 import { ScrollView, Text, Image, TouchableOpacity } from "react-native";
 import axios from "axios";
 import { AuthContext } from "../context";
-import { Input } from "../components";
+import { TextInput } from "react-native-paper";
 
 export function Login({ navigation, route }) {
   const { setAToken, setRToken } = useContext(AuthContext);
-
   async function enviarDatos() {
     const { data } = await axios.post("/auth/login", {
       correo,
@@ -31,9 +30,7 @@ export function Login({ navigation, route }) {
   function irARecuperarClave() {
     navigation.navigate("RecuperarClave", correo);
   }
-  function irARegistro() {
-    navigation.navigate("Registro");
-  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Image
@@ -43,31 +40,28 @@ export function Login({ navigation, route }) {
 
       <Text style={styles.logoText}>Login Bienvenido</Text>
 
-      <Input
-        placeholder="Correo"
+      <TextInput
+        style={styles.input}
+        label="Correo"
         value={correo}
         onChangeText={setCorreo}
         keyboardType={"email-address"}
       />
 
-      <Input
+      <TextInput
+        style={styles.input}
         value={clave}
         onChangeText={setClave}
-        placeholder="Clave"
+        label="Clave"
         password={true}
       />
 
       <TouchableOpacity onPress={irARecuperarClave}>
-        <Text style={styles.txt}>¿Olvide mi contraseña?</Text>
+        <Text style={styles.txt}>¿Olvido su contraseña?</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.btn} onPress={enviarDatos}>
         <Text style={styles.btnText}>Ingresar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity onPress={irARegistro}>
-        <Text>
-          ¿No tienes una cuenta? <Text style={styles.txt}>Registrate</Text>
-        </Text>
       </TouchableOpacity>
     </ScrollView>
   );
@@ -78,13 +72,13 @@ const styles = StyleSheet.create({
     minHeight: "100%",
     backgroundColor: "#fff",
     //justifyContent: 'center',
-    alignItems: "center",
   },
   logo: {
     width: 70,
     height: 70,
-    padding: 50, 
+    padding: 50,
     marginTop: 30,
+    alignSelf: "center",
   },
   logoText: {
     marginVertical: 15,
@@ -101,6 +95,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     textAlign: "center",
     textShadowColor: "#191970",
+    alignSelf: "center",
   },
   btnText: {
     fontSize: 16,
@@ -112,5 +107,10 @@ const styles = StyleSheet.create({
   txt: {
     color: "#0080FF",
     fontWeight: "500",
+    textAlign: "center",
   },
-});   
+  input: {
+    backgroundColor: "#fcfcfc",
+    margin: 15,
+  },
+});

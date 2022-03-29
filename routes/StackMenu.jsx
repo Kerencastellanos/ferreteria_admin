@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useContext } from "react";
 import { AuthContext } from "../context";
-import { Login } from "../pages";
+import { Cliente, Login, RecuperarClave } from "../pages";
 import { Tabsmenu } from "./Tabsmenu";
 
 const Stack = createNativeStackNavigator();
@@ -17,10 +17,12 @@ export function StackMenu() {
             name="TabsMenu"
             component={Tabsmenu}
           />
+          <Stack.Screen name="Cliente" component={Cliente} />
         </Stack.Group>
       ) : (
         <Stack.Group>
           <Stack.Screen name="login" component={Login} />
+          <Stack.Screen name="RecuperarClave" component={RecuperarClave} />
         </Stack.Group>
       )}
     </Stack.Navigator>

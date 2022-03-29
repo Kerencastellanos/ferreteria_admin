@@ -3,10 +3,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   View,
+  Text,
 } from "react-native";
-import { Divider, Menu } from "react-native-paper";
+import { Button, Divider, Menu } from "react-native-paper";
 import { FontAwesome } from "@expo/vector-icons";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   requestCameraPermissionsAsync,
   launchCameraAsync,
@@ -25,12 +26,12 @@ export function CrearProducto() {
   }, []);
   async function solicitarPermisos() {
     setCargando(true);
-    const cameraPermission = await getCameraPermissionsAsync();
+    let cameraPermission = await getCameraPermissionsAsync();
     if (!cameraPermission.granted) {
-      const res = await requestCameraPermissionsAsync();
-      setCargando(false);
-      setTienePermiso(res.granted);
+      cameraPermission = await requestCameraPermissionsAsync();
     }
+    setTienePermiso(cameraPermission.granted);
+    setCargando(false);
   }
   if (cargando) {
     return (
@@ -40,8 +41,13 @@ export function CrearProducto() {
     );
   }
 
-  if (cargando) {
-    return <View style={styles.container}></View>;
+  if (!cargando && !tienePermiso) {
+    return (
+      <View style={styles.container}>
+        <Text>Nesesita permiso para acceder a la camara y fotos </Text>
+        <Button onPress={solicitarPermisos}>Volver a Solicitar Permisos</Button>
+      </View>
+    );
   }
   return (
     <View style={styles.container}>
