@@ -1,8 +1,15 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { Image, Text, StyleSheet, View, FlatList } from "react-native";
+import {
+  TouchableOpacity,
+  Image,
+  Text,
+  StyleSheet,
+  View,
+  FlatList,
+} from "react-native";
 
-export function ResumenVentas() {
+export function ResumenVentas({ navigation }) {
   useEffect(() => {
     obtenerVentas();
   }, []);
@@ -16,7 +23,11 @@ export function ResumenVentas() {
     setCargando(false);
     setVentas(data.ventas);
   }
-
+  function verVenta(venta) {
+    return (e) => {
+      navigation.navigate("Venta", venta);
+    };
+  }
   return (
     <FlatList
       refreshing={cargando}
@@ -25,7 +36,8 @@ export function ResumenVentas() {
       data={ventas}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
-        <View
+        <TouchableOpacity
+          onPress={verVenta(item)}
           style={{
             flexDirection: "row",
             marginVertical: 15,
@@ -58,7 +70,7 @@ export function ResumenVentas() {
               {item.entregado ? "Entregado" : "No entregado"}
             </Text>
           </View>
-        </View>
+        </TouchableOpacity>
       )}
     />
   );
