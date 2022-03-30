@@ -22,7 +22,6 @@ export function Login({ navigation, route }) {
     }
     setAToken(data.accessToken);
     setRToken(data.refreshToken);
-    navigation.navigate("Cart");
   }
   const [correo, setCorreo] = useState(route.params || "");
   const [clave, setClave] = useState("");
