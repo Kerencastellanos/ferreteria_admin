@@ -1,27 +1,25 @@
 {
   "expo": {
-    "name": "ferreteria_admin",
+    "name": "Ferreteria Movil Admin",
     "slug": "ferreteria_admin",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/helmet.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/helmet.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/helmet.png",
         "backgroundColor": "#FFFFFF"
       }
     },
