@@ -2,14 +2,16 @@ import {
   ActivityIndicator,
   StyleSheet,
   View,
+  TouchableOpacity,
   ScrollView,
   FlatList,
   useWindowDimensions,
   Text,
   Image,
 } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 import { Button, Divider, Menu, TextInput } from "react-native-paper";
-import { useReducer, useState, useEffect } from "react";
+import { useRef, useReducer, useState, useEffect } from "react";
 import {
   requestCameraPermissionsAsync,
   launchCameraAsync,
@@ -25,6 +27,10 @@ export function CrearProducto() {
   const [tienePermiso, setTienePermiso] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [ready, setReady] = useState(false);
+  /**
+   * @type {React.MutableRefObject<FlatList<any>>}
+   */
+  const flatlistRef = useRef();
   const [prod, setProd] = useReducer(
     (prev, newState) => {
       return { ...prev, ...newState };
@@ -54,6 +60,34 @@ export function CrearProducto() {
     setTienePermiso(cameraPermission.granted);
     setCargando(false);
   }
+
+  async function openGallery() {
+    alternarMenu();
+    const res = await launchImageLibraryAsync({
+      mediaTypes: MediaTypeOptions.Images,
+      allowsEditing: true,
+    });
+    setProd({ imagenes: [...prod.imagenes, res] });
+  }
+  function removeImagen(imagen, index) {
+    return () => {
+      setProd({ imagenes: prod.imagenes.filter((i) => i.uri != imagen.uri) });
+      if (index != 0) {
+        flatlistRef.current.scrollToIndex({
+          index: index - 1,
+        });
+      }
+    };
+  }
+  async function openCamera() {
+    alternarMenu();
+    const res = await launchCameraAsync({
+      mediaTypes: MediaTypeOptions.Images,
+      allowsEditing: true,
+    });
+    setProd({ imagenes: [...prod.imagenes, res] });
+  }
+
   if (cargando) {
     return (
       <View style={styles.container}>
@@ -61,24 +95,7 @@ export function CrearProducto() {
       </View>
     );
   }
-  async function openGallery() {
-    alternarMenu();
-    const res = await launchImageLibraryAsync({
-      mediaTypes: MediaTypeOptions.Images,
-      allowsEditing: true,
-    });
-    console.log(res);
-    prod.imagenes.push(res);
-  }
 
-  async function openCamera() {
-    alternarMenu();
-    const res = await launchCameraAsync({
-      mediaTypes: MediaTypeOptions.Images,
-      allowsEditing: true,
-    });
-    prod.imagenes.push(res);
-  }
   if (!cargando && !tienePermiso) {
     return (
       <View style={styles.container}>
@@ -91,19 +108,35 @@ export function CrearProducto() {
     <ScrollView>
       {prod.imagenes.length ? (
         <FlatList
+          ref={flatlistRef}
           pagingEnabled={true}
           keyExtractor={(item) => item.uri}
           data={prod.imagenes}
           renderItem={({ item, index }) => (
             <View style={{ position: "relative" }}>
+              <TouchableOpacity
+                onPress={removeImagen(item, index)}
+                style={{
+                  position: "absolute",
+                  zIndex: 998,
+                  right: 5,
+                  top: 5,
+                  padding: 2,
+                  borderRadius: 15,
+                  color: "white",
+                  backgroundColor: "#333",
+                }}
+              >
+                <AntDesign name="close" size={24} color="white" />
+              </TouchableOpacity>
               <Text
                 style={{
                   position: "absolute",
                   zIndex: 999,
-                  padding: 10,
+                  padding: 5,
                   borderRadius: 5,
                   right: 5,
-                  top: 5,
+                  bottom: 5,
                   color: "white",
                   backgroundColor: "#333",
                 }}
