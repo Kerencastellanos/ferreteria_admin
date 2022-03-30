@@ -19,6 +19,7 @@ import {
   getCameraPermissionsAsync,
   MediaTypeOptions,
 } from "expo-image-picker";
+import axios from "axios";
 
 export function CrearProducto() {
   const { width } = useWindowDimensions();
@@ -35,10 +36,40 @@ export function CrearProducto() {
     (prev, newState) => {
       return { ...prev, ...newState };
     },
-    { nombre: "", precio: "", cantidad: "", imagenes: [] }
+    { nombre: "", precio: "", stock: "", imagenes: [] }
   );
+
+  async function subirProducto() {
+    const body = new FormData();
+    prod.imagenes.forEach(({ type, uri }) => {
+      let parts = uri.split("ImagePicker/");
+      let name = parts[1];
+      body.append("imagenes[]", { name, type, uri });
+    });
+    Object.keys(prod).forEach((k) => {
+      if (k != "imagenes") {
+        body.append(k, prod[k]);
+      }
+    });
+    console.log(axios.defaults.baseURL);
+    try {
+      const res = await fetch(`${axios.defaults.baseURL}/productos`, {
+        method: "post",
+        body,
+        headers: {
+          ...axios.defaults.headers, // token
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      const data = await res.json();
+      console.log(data);
+    } catch (error) {
+      console.warn(error);
+    }
+  }
+
   useEffect(() => {
-    if (prod.precio && prod.cantidad && prod.nombre && prod.imagenes.length) {
+    if (prod.precio && prod.stock && prod.nombre && prod.imagenes.length) {
       setReady(true);
       return;
     }
@@ -66,8 +97,12 @@ export function CrearProducto() {
     const res = await launchImageLibraryAsync({
       mediaTypes: MediaTypeOptions.Images,
       allowsEditing: true,
+      allowsMultipleSelection: true,
     });
-    setProd({ imagenes: [...prod.imagenes, res] });
+    console.log(res);
+    if (!res.cancelled) {
+      setProd({ imagenes: [...prod.imagenes, res] });
+    }
   }
   function removeImagen(imagen, index) {
     return () => {
@@ -85,7 +120,10 @@ export function CrearProducto() {
       mediaTypes: MediaTypeOptions.Images,
       allowsEditing: true,
     });
-    setProd({ imagenes: [...prod.imagenes, res] });
+    console.log(res);
+    if (!res.cancelled) {
+      setProd({ imagenes: [...prod.imagenes, res] });
+    }
   }
 
   if (cargando) {
@@ -182,15 +220,17 @@ export function CrearProducto() {
           label={"Precio"}
         />
         <TextInput
-          onChangeText={(cantidad) => setProd({ cantidad })}
+          onChangeText={(stock) => setProd({ stock })}
           keyboardType="numeric"
-          value={prod.cantidad}
-          error={isNaN(prod.cantidad)}
+          value={prod.stock}
+          error={isNaN(prod.stock)}
           style={styles.input}
           label={"Cantidad"}
           clearButtonMode={"while-editing"}
         />
-        <Button disabled={!ready}>Subir</Button>
+        <Button onPress={subirProducto} disabled={!ready}>
+          Subir
+        </Button>
       </View>
     </ScrollView>
   );
