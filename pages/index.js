@@ -5,3 +5,4 @@ export { Login } from "./Login";
 export { RecuperarClave } from "./RecuperarClave";
 export { Clientes } from "./Clientes";
 export { Cliente } from "./Cliente";
+export { Productos } from "./Productos";

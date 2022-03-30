@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Clientes, CrearProducto, ResumenVentas } from "../pages";
+import { Clientes, CrearProducto, ResumenVentas, Productos } from "../pages";
 import { AntDesign } from "@expo/vector-icons";
+
 
 const Tabs = createBottomTabNavigator();
 
@@ -33,6 +34,15 @@ export function Tabsmenu() {
         }}
         name="Clientes"
         component={Clientes}
+      />
+      <Tabs.Screen
+        options={{
+          tabBarIcon: ({ size, color }) => (
+            <AntDesign name="shoppingcart" size={size} color={color} />
+          ),
+        }}
+        name="Productos"
+        component={Productos}
       />
     </Tabs.Navigator>
   );
