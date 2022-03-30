@@ -10,34 +10,35 @@ import {
 } from "react-native";
 
 export function ResumenVentas({ navigation }) {
+  // permise ejecutar codifo cada vez q
+  // cambian las dependencias dentro de []
   useEffect(() => {
+    // solo se ejecuta al inicio
     obtenerVentas();
-  }, []);
+  }, []); // propiedades q evalua para volver a aejecutarse
 
   const [ventas, setVentas] = useState([]);
   const [cargando, setCargando] = useState(false);
   async function obtenerVentas() {
     setCargando(true);
-    const { data } = await axios.get("/ventas/listar");
-    console.log(data.ventas[0]);
+    const { data } = await axios.get("/ventas/listar"); // realizar peticion a la api
+    console.log("Respuesta de /ventas/listar:", data);
     setCargando(false);
     setVentas(data.ventas);
   }
   function verVenta(venta) {
-    return (e) => {
-      navigation.navigate("Venta", venta);
-    };
+    navigation.navigate("Venta", venta);
   }
   return (
     <FlatList
-      refreshing={cargando}
-      contentContainerStyle={{ padding: 15 }}
-      onRefresh={obtenerVentas}
       data={ventas}
+      refreshing={cargando}
+      onRefresh={obtenerVentas}
+      contentContainerStyle={{ padding: 15 }}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <TouchableOpacity
-          onPress={verVenta(item)}
+          onPress={() => verVenta(item)}
           style={{
             flexDirection: "row",
             marginVertical: 15,
@@ -51,13 +52,19 @@ export function ResumenVentas({ navigation }) {
               height: 50,
             }}
           />
+          {/* contenedor */}
           <View>
             <Text>{item.cliente.nombre}</Text>
             <Text>
-              {item.detalles.reduce((prev, c) => prev + c.cantidad, 0)} Items
+              {item.detalles.reduce(
+                (prev, detalle) => prev + detalle.cantidad,
+                0
+              )}{" "}
+              Items
             </Text>
             <Text>{new Date(item.fecha).toLocaleString()}</Text>
           </View>
+          {/* contenedor */}
           <View>
             <Text>
               LPS.
