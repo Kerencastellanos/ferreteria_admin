@@ -47,7 +47,7 @@ export function ResumenVentas({ navigation }) {
         >
           <Image
             source={{
-              uri: item.detalles[0].producto.imagenes[0].url,
+              uri: item.detalles[0].producto.imagenes[0].imagenUrl,
               width: 50,
               height: 50,
             }}

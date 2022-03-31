@@ -41,6 +41,9 @@ export function AuthProvider({ children }) {
           console.log(res.data.error);
           console.log("rToken:", rToken);
           const atoken = await refreshToken();
+          if (!atoken) {
+            return res;
+          }
           console.log(res.config.data);
           return await axios.request({
             ...res.config,

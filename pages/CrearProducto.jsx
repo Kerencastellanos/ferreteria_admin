@@ -44,7 +44,11 @@ export function CrearProducto() {
     prod.imagenes.forEach(({ type, uri }) => {
       let parts = uri.split("ImagePicker/");
       let name = parts[1];
-      body.append("imagenes[]", { name, type, uri });
+      body.append("imagenes[]", {
+        name,
+        type: `${type / name.split(".")[1]}`,
+        uri,
+      });
     });
     Object.keys(prod).forEach((k) => {
       if (k != "imagenes") {
