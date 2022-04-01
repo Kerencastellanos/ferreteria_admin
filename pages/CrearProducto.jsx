@@ -36,36 +36,35 @@ export function CrearProducto() {
     (prev, newState) => {
       return { ...prev, ...newState };
     },
-    { nombre: "", precio: "", stock: "", imagenes: [] }
+    { descripcion: "", nombre: "", precio: 0, stock: 0, imagenes: [] }
   );
 
   async function subirProducto() {
     const body = new FormData();
     Object.keys(prod).forEach((k) => {
       if (k != "imagenes") {
-        console.log(k, prod[k]);
+        console.log(k, prod[k], typeof prod[k]);
         body.append(k, prod[k]);
       }
     });
     prod.imagenes.forEach(({ type, uri }) => {
       let parts = uri.split("ImagePicker/");
       let name = parts[1];
-      body.append("imagenes[]", {
+      body.append("imagenes", {
         name,
         type: `${type}/${name.split(".")[1]}`,
         uri,
       });
     });
 
-    console.log(body);
     try {
       const res = await fetch(`${axios.defaults.baseURL}/productos`, {
         method: "post",
-        body,
         headers: {
           "Content-Type": "multipart/form-data",
           ...axios.defaults.headers, // token
         },
+        body,
       });
       const data = await res.json();
       console.log("Upload producto:", data);
@@ -218,17 +217,24 @@ export function CrearProducto() {
           label={"Nombre"}
         />
         <TextInput
-          onChangeText={(precio) => setProd({ precio })}
-          value={prod.precio}
+          onChangeText={(descripcion) => setProd({ descripcion })}
+          value={prod.descripcion}
+          style={styles.input}
+          multiline={true}
+          label={"Descripcion"}
+        />
+        <TextInput
+          onChangeText={(precio) => setProd({ precio: Number(precio) })}
+          value={String(prod.precio)}
           keyboardType="numeric"
           error={isNaN(prod.precio)}
           style={styles.input}
           label={"Precio"}
         />
         <TextInput
-          onChangeText={(stock) => setProd({ stock })}
+          onChangeText={(stock) => setProd({ stock: Number(stock) })}
           keyboardType="numeric"
-          value={prod.stock}
+          value={String(prod.stock)}
           error={isNaN(prod.stock)}
           style={styles.input}
           label={"Cantidad"}
