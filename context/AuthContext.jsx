@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { createContext, useEffect, useState } from "react";
-
+import * as SplashScreen from "expo-splash-screen";
 export const AuthContext = createContext({
   isAuth: false,
   setIsAuth(isAuth = true) {},
@@ -41,6 +41,7 @@ export function AuthProvider({ children }) {
           console.log(res.data.error);
           console.log("rToken:", rToken);
           const atoken = await refreshToken();
+          SplashScreen.hideAsync();
           if (!atoken) {
             return res;
           }
@@ -64,6 +65,7 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
+    SplashScreen.preventAutoHideAsync();
     CheckTokens();
   }, []);
 
@@ -106,7 +108,7 @@ export function AuthProvider({ children }) {
           console.log("auth true");
           setUser(data.usuario);
           setIsAuth(true);
-
+          SplashScreen.hideAsync();
           return;
         }
       } catch (error) {

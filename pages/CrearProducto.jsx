@@ -41,32 +41,34 @@ export function CrearProducto() {
 
   async function subirProducto() {
     const body = new FormData();
+    Object.keys(prod).forEach((k) => {
+      if (k != "imagenes") {
+        console.log(k, prod[k]);
+        body.append(k, prod[k]);
+      }
+    });
     prod.imagenes.forEach(({ type, uri }) => {
       let parts = uri.split("ImagePicker/");
       let name = parts[1];
       body.append("imagenes[]", {
         name,
-        type: `${type / name.split(".")[1]}`,
+        type: `${type}/${name.split(".")[1]}`,
         uri,
       });
     });
-    Object.keys(prod).forEach((k) => {
-      if (k != "imagenes") {
-        body.append(k, prod[k]);
-      }
-    });
-    console.log(axios.defaults.baseURL);
+
+    console.log(body);
     try {
       const res = await fetch(`${axios.defaults.baseURL}/productos`, {
         method: "post",
         body,
         headers: {
-          ...axios.defaults.headers, // token
           "Content-Type": "multipart/form-data",
+          ...axios.defaults.headers, // token
         },
       });
       const data = await res.json();
-      console.log(data);
+      console.log("Upload producto:", data);
     } catch (error) {
       console.warn(error);
     }

@@ -21,10 +21,14 @@ export function ResumenVentas({ navigation }) {
   const [cargando, setCargando] = useState(false);
   async function obtenerVentas() {
     setCargando(true);
-    const { data } = await axios.get("/ventas/listar"); // realizar peticion a la api
-    console.log("Respuesta de /ventas/listar:", data);
+    try {
+      const { data } = await axios.get("/ventas/listar"); // realizar peticion a la api
+      console.log("Respuesta de /ventas/listar:", data);
+      setVentas(data.ventas);
+    } catch (error) {
+      console.error(error);
+    }
     setCargando(false);
-    setVentas(data.ventas);
   }
   function verVenta(venta) {
     navigation.navigate("Venta", venta);
@@ -46,11 +50,17 @@ export function ResumenVentas({ navigation }) {
           }}
         >
           <Image
-            source={{
-              uri: item.detalles[0].producto.imagenes[0].imagenUrl,
+            style={{
               width: 50,
               height: 50,
             }}
+            source={
+              item.detalles[0].producto.imagenes.length
+                ? {
+                    uri: item.detalles[0].producto.imagenes[0].imagenUrl,
+                  }
+                : require("../assets/helmet.png")
+            }
           />
           {/* contenedor */}
           <View>
