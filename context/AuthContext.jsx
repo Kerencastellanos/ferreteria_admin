@@ -118,6 +118,7 @@ export function AuthProvider({ children }) {
     }
     console.log("auth false");
     setIsAuth(false);
+    SplashScreen.hideAsync();
   }
 
   return (

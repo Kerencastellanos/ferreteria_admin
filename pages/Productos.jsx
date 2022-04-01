@@ -1,9 +1,9 @@
 import axios from "axios";
-import { View, FlatList, Text, Image } from "react-native";
+import { TouchableOpacity, View, FlatList, Text, Image } from "react-native";
 import { useEffect, useState } from "react";
 import { Entypo } from "@expo/vector-icons";
 
-export function Productos() {
+export function Productos({ navigation }) {
   const [cargando, setCargando] = useState(false);
   const [productos, setProductos] = useState();
   useEffect(() => {
@@ -25,7 +25,8 @@ export function Productos() {
         data={productos}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View
+          <TouchableOpacity
+            onPress={() => navigation.navigate("EditarProducto", item)}
             style={{
               marginVertical: 10,
               borderBottomColor: "#d1d1d1",
@@ -50,7 +51,7 @@ export function Productos() {
               <Text>Cantidad: {item.stock}</Text>
               <Text>Precio: Lps.{item.precio}</Text>
             </View>
-          </View>
+          </TouchableOpacity>
         )}
       />
     </View>
