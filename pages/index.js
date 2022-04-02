@@ -7,3 +7,4 @@ export { Clientes } from "./Clientes";
 export { Cliente } from "./Cliente";
 export { Productos } from "./Productos";
 export { Splash } from "./Splash";
+export { Imagenes } from "./Imagenes";

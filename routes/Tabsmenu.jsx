@@ -1,5 +1,11 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Clientes, CrearProducto, ResumenVentas, Productos } from "../pages";
+import {
+  Clientes,
+  CrearProducto,
+  ResumenVentas,
+  Productos,
+  Imagenes,
+} from "../pages";
 import { AntDesign } from "@expo/vector-icons";
 import { Button, IconButton } from "react-native-paper";
 import axios from "axios";
@@ -62,6 +68,15 @@ export function Tabsmenu() {
         }}
         name="Productos"
         component={Productos}
+      />
+      <Tabs.Screen
+        options={{
+          tabBarIcon: ({ size, color }) => (
+            <AntDesign name="shoppingcart" size={size} color={color} />
+          ),
+        }}
+        name="Imagenes"
+        component={Imagenes}
       />
     </Tabs.Navigator>
   );

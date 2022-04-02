@@ -101,31 +101,28 @@ export function CrearProducto({ route }) {
     });
 
     setCargando(true);
-    try {
-      let method = params ? "put" : "post";
-      await fetch(`${axios.defaults.baseURL}/productos`, {
-        method,
-        headers: {
-          "Content-Type": "multipart/form-data",
-          ...axios.defaults.headers, // token
-        },
-        body,
-      });
-      setProd({
-        categoriaFk: 1,
-        descripcion: "",
-        nombre: "",
-        precio: 0,
-        stock: 0,
-        imagenes: [],
-      });
-      Alert.alert(
-        "Ferreteria Movil",
-        `Producto ${method == "post" ? "creado" : "actualizado"} con exito`
-      );
-    } catch (error) {
-      console.warn(error);
-    }
+    let method = params ? "put" : "post";
+    await fetch(`${axios.defaults.baseURL}/productos`, {
+      method,
+      headers: {
+        "Content-Type": "multipart/form-data",
+        ...axios.defaults.headers, // token
+      },
+      body,
+    });
+    setProd({
+      categoriaFk: 1,
+      descripcion: "",
+      nombre: "",
+      precio: 0,
+      stock: 0,
+      imagenes: [],
+    });
+    Alert.alert(
+      "Ferreteria Movil",
+      `Producto ${method == "post" ? "creado" : "actualizado"} con exito`
+    );
+
     setCargando(false);
   }
 
