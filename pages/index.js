@@ -6,3 +6,4 @@ export { RecuperarClave } from "./RecuperarClave";
 export { Clientes } from "./Clientes";
 export { Cliente } from "./Cliente";
 export { Productos } from "./Productos";
+export { Splash } from "./Splash";
