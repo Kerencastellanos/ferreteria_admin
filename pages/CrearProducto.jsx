@@ -56,7 +56,7 @@ export function CrearProducto({ route }) {
       return { ...prev, ...newState };
     },
     {
-      categoriaFk: "",
+      categoriaFk: 1,
       descripcion: "",
       nombre: "",
       precio: 0,
@@ -100,8 +100,8 @@ export function CrearProducto({ route }) {
       });
     });
 
+    setCargando(true);
     try {
-      setCargando(true);
       let method = params ? "put" : "post";
       await fetch(`${axios.defaults.baseURL}/productos`, {
         method,
@@ -111,12 +111,22 @@ export function CrearProducto({ route }) {
         },
         body,
       });
-      setCargando(true);
-      setProd({});
-      Alert.alert("Ferreteria Movil", "Producto CReado con exito");
+      setProd({
+        categoriaFk: 1,
+        descripcion: "",
+        nombre: "",
+        precio: 0,
+        stock: 0,
+        imagenes: [],
+      });
+      Alert.alert(
+        "Ferreteria Movil",
+        `Producto ${method == "post" ? "creado" : "actualizado"} con exito`
+      );
     } catch (error) {
       console.warn(error);
     }
+    setCargando(false);
   }
 
   useEffect(() => {
@@ -138,7 +148,6 @@ export function CrearProducto({ route }) {
   }
   useEffect(() => {
     if (params) {
-      console.log(params);
       setProd({ ...params, categoriaFk: params.categoria.id });
       setCategoria(params.categoria);
     }

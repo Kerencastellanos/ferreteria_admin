@@ -1,3 +1,4 @@
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import {
@@ -8,7 +9,10 @@ import {
   View,
   FlatList,
 } from "react-native";
-
+/**
+ *
+ * @param {{navigation:NativeStackNavigationProp<{ResumenVentas,Venta:{venta:any}},"ResumenVentas">}} param0
+ */
 export function ResumenVentas({ navigation }) {
   // permise ejecutar codifo cada vez q
   // cambian las dependencias dentro de []
@@ -31,7 +35,7 @@ export function ResumenVentas({ navigation }) {
     setCargando(false);
   }
   function verVenta(venta) {
-    navigation.navigate("Venta", venta);
+    navigation.navigate("Venta", { venta, onGoBack: obtenerVentas });
   }
   return (
     <FlatList

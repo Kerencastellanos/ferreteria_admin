@@ -4,15 +4,18 @@ import { Button } from "react-native-paper";
 import { useState } from "react";
 
 export function Venta({ route }) {
-  let { id, cliente, detalles, entregado, fecha } = route.params;
+  let { id, cliente, detalles, entregado, fecha, fechaEntrega } = route.params;
   console.log(id);
+  const [fechaentrega, setFechaentrega] = useState(fechaEntrega);
   const [cargando, setcargando] = useState(false);
   const [btnVisible, setBtnVisible] = useState(!entregado);
   async function entregarProducto() {
     setcargando(true);
     try {
       const { data } = await axios.put(`/ventas/${id}`);
-      if (data == true) {
+      console.log(data);
+      if (data.entregado) {
+        setFechaentrega(data.fechaEntrega);
         setBtnVisible(false);
       }
     } catch (error) {
@@ -25,18 +28,23 @@ export function Venta({ route }) {
       <FlatList
         ListHeaderComponent={() => (
           <View style={{ margin: 15 }}>
-            <Text style={{ fontSize: 25 }}>Cliente: {cliente.nombre} </Text>
+            <Text style={{ fontSize: 20 }}>Cliente: {cliente.nombre} </Text>
             <Text
               style={[
-                { fontSize: 25 },
+                { fontSize: 20 },
                 !btnVisible ? { color: "green" } : { color: "red" },
               ]}
             >
               Entregado: {!btnVisible ? "Si" : "No"}{" "}
             </Text>
-            <Text style={{ fontSize: 25 }}>
-              Fecha: {new Date(fecha).toLocaleString()}{" "}
+            <Text style={{ fontSize: 20 }}>
+              Fecha venta: {new Date(fecha).toLocaleDateString()}
             </Text>
+            {fechaentrega ? (
+              <Text style={{ fontSize: 20 }}>
+                Fecha Entrega: {new Date(fechaentrega).toLocaleDateString()}
+              </Text>
+            ) : null}
             {btnVisible ? (
               <Button
                 loading={cargando}
@@ -47,7 +55,7 @@ export function Venta({ route }) {
                 Marcar como Entregado
               </Button>
             ) : null}
-            <Text style={{ fontSize: 25 }}>Productos: </Text>
+            <Text style={{ fontSize: 20 }}>Productos: </Text>
           </View>
         )}
         data={detalles}

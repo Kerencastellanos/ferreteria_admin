@@ -69,6 +69,7 @@ export function AuthProvider({ children }) {
   async function refreshToken() {
     if (!rToken) {
       console.log("No hay rToken");
+      setGotoLogin(true);
       return;
     }
     console.log("refresh Token ", rToken);

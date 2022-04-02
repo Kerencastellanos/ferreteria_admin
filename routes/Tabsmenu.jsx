@@ -1,13 +1,32 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Clientes, CrearProducto, ResumenVentas, Productos } from "../pages";
 import { AntDesign } from "@expo/vector-icons";
-
+import { Button, IconButton } from "react-native-paper";
+import axios from "axios";
+import { AuthContext } from "../context";
+import { useContext } from "react";
 
 const Tabs = createBottomTabNavigator();
 
 export function Tabsmenu() {
+  const { setRToken } = useContext(AuthContext);
+  async function cerrarSession() {
+    try {
+      const { data } = await axios.delete("/auth/logout");
+      console.log(data);
+      setRToken("");
+    } catch (error) {
+      console.warn(error);
+    }
+  }
   return (
-    <Tabs.Navigator>
+    <Tabs.Navigator
+      screenOptions={{
+        headerRight: () => (
+          <Button onPress={cerrarSession}>Cerrar Session</Button>
+        ),
+      }}
+    >
       <Tabs.Screen
         options={{
           tabBarIcon: ({ size, color }) => (
