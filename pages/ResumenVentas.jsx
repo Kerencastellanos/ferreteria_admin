@@ -13,7 +13,7 @@ import {
  *
  * @param {{navigation:NativeStackNavigationProp<{ResumenVentas,Venta:{venta:any}},"ResumenVentas">}} param0
  */
-export function ResumenVentas({ navigation }) {
+export function ResumenVentas({ navigation, route }) {
   // permise ejecutar codifo cada vez q
   // cambian las dependencias dentro de []
   useEffect(() => {
@@ -35,7 +35,10 @@ export function ResumenVentas({ navigation }) {
     setCargando(false);
   }
   function verVenta(venta) {
-    navigation.navigate("Venta", { venta, onGoBack: obtenerVentas });
+    navigation.navigate({
+      name: "Venta",
+      params: venta,
+    });
   }
   return (
     <FlatList

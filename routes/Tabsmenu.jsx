@@ -9,12 +9,11 @@ import { useContext } from "react";
 const Tabs = createBottomTabNavigator();
 
 export function Tabsmenu() {
-  const { setRToken } = useContext(AuthContext);
+  const { setAuth } = useContext(AuthContext);
   async function cerrarSession() {
     try {
-      const { data } = await axios.delete("/auth/logout");
-      console.log(data);
-      setRToken("");
+      await axios.delete("/auth/logout");
+      setAuth({ rToken: "", aToken: "" });
     } catch (error) {
       console.warn(error);
     }

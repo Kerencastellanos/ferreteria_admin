@@ -1,138 +1,116 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useReducer, createContext, useEffect } from "react";
 import axios from "axios";
-import { createContext, useEffect, useState } from "react";
-export const AuthContext = createContext({
-  isAuth: false,
-  setIsAuth(isAuth = true) {},
-  setAToken(aToken = "") {},
-  setRToken(rToken = "") {},
-  rToken: "",
-  aToken: "",
-  gotoLogin: false,
-  setUser(user) {},
-  user: { name: "", email: "", imageUrl: "" },
-  async checkAuth() {},
-  async refreshToken() {},
-});
+/**
+ * @typedef { {isAuth: boolean,aToken: string,rToken: string,user: any, goToLogin: boolean}} IAuthState
+ */
+
+/**
+ *
+ * @param {IAuthState} prev
+ * @param {IAuthState} newState
+ */
+function authReducer(prev, newState) {
+  return { ...prev, ...newState };
+}
+
+/**
+ * @typedef {{goToLogin:boolean,user:{},aToken:string,rToken:string,isAuth:boolean,setAuth:React.DispatchWithoutAction}} IAuthContext
+ */
+
+/**
+ * @type {React.Context<IAuthContext>}
+ */
+export const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [gotoLogin, setGotoLogin] = useState(false);
-  const [user, setUser] = useState({});
-  const [aToken, setAToken] = useState("");
-  const [rToken, setRToken] = useState("");
-  const [isAuth, setIsAuth] = useState(false);
+  /**
+   * @type {[state:IAuthState,setAuth:(value:IAuthState)=>void]}
+   */
+  const [state, setAuth] = useReducer(authReducer, {
+    isAuth: false,
+    aToken: "",
+    rToken: "",
+    user: {},
+    goToLogin: false,
+  });
+  useEffect(() => {
+    // guardar
+    if (state.rToken) {
+      AsyncStorage.setItem("rToken", state.rToken);
+      return;
+    }
+    setAuth({ isAuth: false });
+  }, [state.rToken]);
 
   useEffect(() => {
+    if (!state.aToken) {
+      // si el token esta vacio
+      // no hacemos nada y salimos de esta funcion
+      return;
+    }
     axios.defaults.headers = {
-      Authentication: aToken,
+      Authentication: state.aToken,
     };
-  }, [aToken]);
-
-  useEffect(() => {
-    saveTokens();
-  }, [aToken, rToken]);
-
-  useEffect(() => {
-    if (rToken) {
-      axios.interceptors.response.use(async (res) => {
-        if (res.data.error && res.data.error.includes("jwt")) {
-          console.log("interceptors ");
-          console.log(res.data.error);
-          console.log("rToken:", rToken);
-          const atoken = await refreshToken();
-          if (!atoken) {
-            return res;
-          }
-          console.log(res.config.data);
-          return await axios.request({
-            ...res.config,
-            headers: { Authentication: atoken },
-          });
+    axios
+      .get("/usuarios/me")
+      .then(({ data }) => {
+        console.log("get /usuarios/me");
+        if (!data.usuario) {
+          console.log("auth false");
         }
-        return res;
+        console.log("auth true");
+        setAuth({ isAuth: true, user: data.usuario });
+      })
+      .catch((error) => {
+        console.warn("error-get /auth/me", error);
       });
-    }
-    checkAuth();
-  }, [rToken]);
-
-  async function saveTokens() {
-    if (aToken && rToken) {
-      AsyncStorage.setItem("aToken", aToken);
-      AsyncStorage.setItem("rToken", rToken);
-    }
-  }
+  }, [state.aToken]);
 
   useEffect(() => {
-    CheckTokens();
+    // funcion inicial
+    AsyncStorage.getItem("rToken")
+      .then(async (rToken) => {
+        console.log("get from async storage:", rToken);
+        // refresh token
+        const { data } = await axios.get("/auth/refresh", {
+          params: { refreshToken: rToken },
+        });
+        console.log(data);
+        if (data.accessToken) {
+          // refrecsra el token si hay un error minestra el usuario hace una solicitud
+          axios.interceptors.response.use(
+            (res) => {
+              return res;
+            },
+            async (error) => {
+              console.log("interceptor error");
+              const { data } = await axios.get("/auth/refresh", {
+                params: { rToken },
+              });
+              if (data.accessToken) {
+                console.log("interceptor-Token refrescado");
+                setAuth({ rToken, aToken: data.accessToken });
+                // volver a ntentar ultima request
+                if (error.config) {
+                  console.log("volver a intentar", error.config);
+                  error.config.headers.autenticacion = data.accessToken;
+                  axios.request(error.config);
+                }
+              }
+            }
+          );
+          setAuth({ rToken, aToken: data.accessToken });
+        }
+      })
+      .catch((error) => {
+        setAuth({ goToLogin: true });
+        console.log(error);
+      });
   }, []);
 
-  async function refreshToken() {
-    if (!rToken) {
-      console.log("No hay rToken");
-      setGotoLogin(true);
-      return;
-    }
-    console.log("refresh Token ", rToken);
-    const { data } = await axios.post("/auth/refresh", {
-      refreshToken: rToken,
-    });
-    console.log("data2: ", data);
-    if (data.accessToken) {
-      console.log("new AToken");
-      setAToken(data.accessToken);
-      return data.accessToken;
-    }
-    setGotoLogin(true);
-  }
-  async function CheckTokens() {
-    const a_Token = await AsyncStorage.getItem("aToken");
-    const r_Token = await AsyncStorage.getItem("rToken");
-    console.log("a_Token: ", a_Token, "r_Token: ", r_Token);
-    if (a_Token && r_Token) {
-      console.log("tokens loaded from storage");
-      setAToken(a_Token);
-      setRToken(r_Token);
-    }
-  }
-  async function checkAuth() {
-    console.log("checkAuth-rToken: ", rToken);
-    if (rToken) {
-      console.log("checkAuth");
-      try {
-        const { data } = await axios.get("/usuarios/me");
-
-        console.log("checkAuth-data: ", data);
-        if (data.usuario) {
-          console.log("auth true");
-          setUser(data.usuario);
-          setIsAuth(true);
-          return;
-        }
-      } catch (error) {
-        console.warn(error);
-      }
-      return;
-    }
-    console.log("auth false");
-    setIsAuth(false);
-  }
-
   return (
-    <AuthContext.Provider
-      value={{
-        isAuth,
-        setIsAuth,
-        gotoLogin,
-        user,
-        setUser,
-        aToken,
-        rToken,
-        setAToken,
-        setRToken,
-        checkAuth,
-        refreshToken,
-      }}
-    >
+    <AuthContext.Provider value={{ ...state, setAuth }}>
       {children}
     </AuthContext.Provider>
   );

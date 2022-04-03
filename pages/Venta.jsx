@@ -9,6 +9,7 @@ export function Venta({ route }) {
   const [fechaentrega, setFechaentrega] = useState(fechaEntrega);
   const [cargando, setcargando] = useState(false);
   const [btnVisible, setBtnVisible] = useState(!entregado);
+
   async function entregarProducto() {
     setcargando(true);
     try {

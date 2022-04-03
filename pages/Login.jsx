@@ -6,7 +6,7 @@ import { AuthContext } from "../context";
 import { TextInput } from "react-native-paper";
 
 export function Login({ navigation, route }) {
-  const { setAToken, setRToken } = useContext(AuthContext);
+  const { setAuth } = useContext(AuthContext);
   async function enviarDatos() {
     const { data } = await axios.post("/auth/login", {
       correo,
@@ -20,8 +20,7 @@ export function Login({ navigation, route }) {
       alert("Habido un error vuelva a intentar");
       return;
     }
-    setAToken(data.accessToken);
-    setRToken(data.refreshToken);
+    setAuth({ aToken: data.accessToken, rToken: data.refreshToken });
   }
   const [correo, setCorreo] = useState(route.params || "");
   const [clave, setClave] = useState("");

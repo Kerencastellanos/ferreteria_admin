@@ -1,21 +1,21 @@
-import { Image, Text, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "../context";
 import * as SplashScreen from "expo-splash-screen";
 export function Splash({ navigation }) {
-  const { gotoLogin } = useContext(AuthContext);
+  const { goToLogin } = useContext(AuthContext);
   useEffect(() => {
     SplashScreen.preventAutoHideAsync();
   }, []);
 
   useEffect(() => {
-    console.log("Splash:", gotoLogin);
+    console.log("Splash:", goToLogin);
     SplashScreen.hideAsync().then((res) => {
-      if (gotoLogin) {
+      if (goToLogin) {
         navigation.replace("login");
       }
     });
-  }, [gotoLogin]);
+  }, [goToLogin]);
 
   return <View></View>;
 }
