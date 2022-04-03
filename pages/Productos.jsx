@@ -1,29 +1,55 @@
 import axios from "axios";
-import { TouchableOpacity, View, FlatList, Text, Image } from "react-native";
+import {
+  ActivityIndicator,
+  TouchableOpacity,
+  View,
+  FlatList,
+  Text,
+  Image,
+} from "react-native";
 import { useEffect, useState } from "react";
 import { Entypo } from "@expo/vector-icons";
 
 export function Productos({ navigation }) {
   const [cargando, setCargando] = useState(false);
-  const [productos, setProductos] = useState();
+  const [productos, setProductos] = useState([]);
+  const [inicio, setInicio] = useState(0);
+  const [cantidad, setCantidad] = useState(5);
+  const [maxReached, setMaxReached] = useState(false);
   useEffect(() => {
     solicitarProductos();
   }, []);
   async function solicitarProductos() {
+    if (maxReached) {
+      return;
+    }
     setCargando(true);
-    const { data } = await axios.get("/productos");
+    const { data } = await axios.get("/productos", {
+      params: { inicio, cantidad },
+    });
     setCargando(false);
-    console.log(data);
-    setProductos(data);
+    console.log(data.length);
+    if (!data.length) {
+      setMaxReached(true);
+      return;
+    }
+    setProductos([...productos, ...data]);
+    // paginacion proxima solicitud seran los siguientes 10 productos
+    setInicio(inicio + cantidad);
   }
   return (
     <View style={{ flex: 1 }}>
       <FlatList
+        onEndReached={solicitarProductos}
+        onEndReachedThreshold={0.1}
         refreshing={cargando}
         onRefresh={solicitarProductos}
         contentContainerStyle={{ padding: 10 }}
         data={productos}
         keyExtractor={(item) => item.id}
+        ListFooterComponent={() =>
+          cargando ? <ActivityIndicator size={"large"} color="blue" /> : null
+        }
         renderItem={({ item }) => (
           <TouchableOpacity
             onPress={() => navigation.navigate("EditarProducto", item)}
