@@ -23,11 +23,18 @@ export function ResumenVentas({ navigation, route }) {
 
   const [ventas, setVentas] = useState([]);
   const [cargando, setCargando] = useState(false);
+  useEffect(() => {
+    let noentregadas = ventas.filter((v) => !v.entregado);
+    console.log(noentregadas.length);
+    navigation.setOptions({
+      tabBarBadge: noentregadas.length,
+    });
+  }, [ventas]);
+
   async function obtenerVentas() {
     setCargando(true);
     try {
       const { data } = await axios.get("/ventas/listar"); // realizar peticion a la api
-      console.log("Respuesta de /ventas/listar:", data);
       setVentas(data.ventas);
     } catch (error) {
       console.error(error);

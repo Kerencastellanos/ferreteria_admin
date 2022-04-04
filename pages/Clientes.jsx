@@ -1,5 +1,7 @@
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useRef, useEffect, useState, useLayoutEffect } from "react";
 import {
   TextInput,
   Image,
@@ -7,32 +9,99 @@ import {
   FlatList,
   View,
   Text,
+  useWindowDimensions,
 } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { AntDesign } from "@expo/vector-icons";
+
+/**
+ *
+ * @param {{navigation:NativeStackNavigationProp<{Clientes},"Clientes">}} param0
+ */
 export function Clientes({ navigation }) {
   const [cargando, setCargando] = useState(false);
   const [usuarios, setUsuarios] = useState([]);
   const [inicio, setInicio] = useState(0);
   const [cantidad] = useState(5);
   const [argumento, setArgumento] = useState("");
-  const [maxReached, setMaxReached] = useState(false);
-
-  async function buscar() {
+  const [maxUsuariosCount, setMaxUsuariosCount] = useState(1);
+  const { width } = useWindowDimensions();
+  async function buscar(value) {
+    setDefaultHeaderTitle();
+    setArgumento(value);
+    console.log("Buscar:", value);
     setCargando(true);
     const { data } = await axios.get("/usuarios", {
-      params: { nombre: argumento },
+      params: { nombre: value },
     });
     setCargando(false);
-    console.log("buscar:", data.usuarios);
     setUsuarios(data.usuarios);
   }
   useEffect(() => {
     obtenerClientes();
   }, []);
+  /**
+   * @type {React.MutableRefObject<TextInput>}
+   */
+  const buscarInputRef = useRef();
 
+  function setDefaultHeaderTitle() {
+    navigation.setOptions({
+      headerTitle: "Clientes",
+      headerRight: () => (
+        <TouchableOpacity style={{ padding: 5 }} onPress={setHeaderTitle}>
+          <AntDesign name="search1" size={24} color="black" />
+        </TouchableOpacity>
+      ),
+      headerLeft: null,
+    });
+  }
+  function setHeaderTitle() {
+    navigation.setOptions({
+      headerRight: () => (
+        <TouchableOpacity
+          style={{ marginRight: 10 }}
+          onPress={() => buscarInputRef.current.clear()}
+        >
+          <AntDesign name="close" size={24} color="black" />
+        </TouchableOpacity>
+      ),
+      headerLeft: () => (
+        <TouchableOpacity
+          style={{ marginLeft: 10 }}
+          onPress={setDefaultHeaderTitle}
+        >
+          <AntDesign name="arrowleft" size={24} color="black" />
+        </TouchableOpacity>
+      ),
+      headerTitle: () => (
+        <TextInput
+          ref={buscarInputRef}
+          autoFocus={true}
+          onSubmitEditing={({ nativeEvent }) => buscar(nativeEvent.text)}
+          placeholder="Buscar..."
+          style={{
+            flexGrow: 1,
+            margin: 15,
+            padding: 5,
+            width: width * 0.7,
+          }}
+        />
+      ),
+    });
+  }
+
+  useLayoutEffect(() => {
+    setDefaultHeaderTitle();
+  }, []);
+  async function refreshUsuarios() {
+    setCargando(true);
+    const { data } = await axios.get("/usuarios");
+    setCargando(false);
+    setUsuarios(data.usuarios);
+  }
   async function obtenerClientes() {
-    if (maxReached) {
+    if (maxUsuariosCount == usuarios.length) {
       return;
     }
     setCargando(true);
@@ -41,10 +110,9 @@ export function Clientes({ navigation }) {
     });
     setCargando(false);
     if (!data.usuarios.length) {
-      setMaxReached(true);
+      setMaxUsuariosCount(usuarios.length);
       return;
     }
-    console.log(data);
     setUsuarios([...usuarios, ...data.usuarios]);
     setInicio(inicio + cantidad);
   }
@@ -54,72 +122,51 @@ export function Clientes({ navigation }) {
     };
   }
   return (
-    <FlatList
-      ListHeaderComponent={() => (
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: "#ffff",
-          }}
-        >
-          <TextInput
-            onChangeText={setArgumento}
-            value={argumento}
-            placeholder="Buscar..."
-            style={{
-              flexGrow: 1,
-              margin: 15,
-              padding: 5,
-            }}
-          />
-          <TouchableOpacity style={{ padding: 5 }} onPress={buscar}>
-            <AntDesign name="search1" size={24} color="black" />
-          </TouchableOpacity>
-        </View>
-      )}
-      refreshing={cargando}
-      onRefresh={obtenerClientes}
-      style={{ flex: 1 }}
-      data={usuarios}
-      onEndReached={obtenerClientes}
-      onEndReachedThreshold={0.1}
-      ListEmptyComponent={() => (
-        <Text style={{ textAlign: "center" }}>
-          No se encontraron Usuarios con el argumento "{argumento}"
-        </Text>
-      )}
-      keyExtractor={(item) => item.id}
-      ListFooterComponent={() =>
-        cargando ? <ActivityIndicator size={"small"} /> : null
-      }
-      renderItem={({ item }) => (
-        <TouchableOpacity onPress={verCliente(item)}>
-          <View
-            style={{
-              padding: 15,
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: "#fffff",
-            }}
-          >
-            <Image
-              source={
-                item.imagenUrl
-                  ? { uri: item.imagenUrl }
-                  : require("../assets/helmet.png")
-              }
+    <>
+      <FlatList
+        refreshing={cargando}
+        onRefresh={refreshUsuarios}
+        style={{ flex: 1 }}
+        data={usuarios}
+        onEndReached={obtenerClientes}
+        onEndReachedThreshold={0.1}
+        ListEmptyComponent={() => (
+          <Text style={{ textAlign: "center" }}>
+            No se encontraron Usuarios con el argumento "{argumento}"
+          </Text>
+        )}
+        keyExtractor={(item) => item.id}
+        ListFooterComponent={() =>
+          cargando ? <ActivityIndicator size={"small"} /> : null
+        }
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={verCliente(item)}>
+            <View
               style={{
-                borderRadius: 25,
-                width: 50,
-                height: 50,
-                marginRight: 5,
+                padding: 15,
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "#fffff",
               }}
-            />
-            <Text>{item.nombre}</Text>
-          </View>
-        </TouchableOpacity>
-      )}
-    />
+            >
+              <Image
+                source={
+                  item.imagenUrl
+                    ? { uri: item.imagenUrl }
+                    : require("../assets/helmet.png")
+                }
+                style={{
+                  borderRadius: 25,
+                  width: 50,
+                  height: 50,
+                  marginRight: 5,
+                }}
+              />
+              <Text>{item.nombre}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
+    </>
   );
 }
