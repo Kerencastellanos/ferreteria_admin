@@ -26,7 +26,13 @@ export function StackMenu() {
           />
           <Stack.Screen name="Cliente" component={Cliente} />
           <Stack.Screen name="Venta" component={Venta} />
-          <Stack.Screen name="EditarProducto" component={CrearProducto} />
+          <Stack.Screen
+            options={{
+              headerTitle: "Editar Producto",
+            }}
+            name="EditarProducto"
+            component={CrearProducto}
+          />
         </Stack.Group>
       ) : (
         <Stack.Group>

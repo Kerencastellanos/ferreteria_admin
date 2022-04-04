@@ -31,6 +31,7 @@ import {
   MediaTypeOptions,
 } from "expo-image-picker";
 import axios from "axios";
+import { compareObjs, objsDiff } from "../constantes";
 
 export function CrearProducto({ route }) {
   const params = route.params;
@@ -51,6 +52,7 @@ export function CrearProducto({ route }) {
   const flatlistRef = useRef();
   const [categoria, setCategoria] = useState({ id: 0, nombre: "" });
   const [categorias, setCategorias] = useState([]);
+  const [prodCopy, setProdCopy] = useState({});
   const [prod, setProd] = useReducer(
     (prev, newState) => {
       return { ...prev, ...newState };
@@ -82,11 +84,48 @@ export function CrearProducto({ route }) {
       setCategorias(data);
     }
   }
+  async function updateProd() {
+    let prodDiff = objsDiff(prodCopy, prod);
+    const body = new FormData();
+    Object.keys(prodDiff).forEach((k) => {
+      if (k != "imagenes") {
+        body.append(k, prodDiff[k]);
+      }
+    });
+    if (prodDiff.imagenes) {
+      let imagenes = prodDiff.imagenes.filter((e) => !e.startsWith("https"));
+      imagenes.forEach(({ type, uri }) => {
+        let parts = uri.split("ImagePicker/");
+        let name = parts[1];
+        body.append("imagenes", {
+          name,
+          type: `${type}/${name.split(".")[1]}`,
+          uri,
+        });
+      });
+    }
+    body.append("id", prod.id);
+    console.log(body);
+    setCargando(true);
+    try {
+      await fetch(`${axios.defaults.baseURL}/productos`, {
+        method: "put",
+        headers: {
+          "Content-Type": "multipart/form-data",
+          ...axios.defaults.headers, // token
+        },
+        body,
+      });
+      Alert.alert("Ferreteria Movil", `Producto actualizado con exito`);
+    } catch (error) {
+      console.warn(error);
+    }
+    setCargando(false);
+  }
   async function subirProducto() {
     const body = new FormData();
     Object.keys(prod).forEach((k) => {
       if (k != "imagenes") {
-        console.log(k, prod[k], typeof prod[k]);
         body.append(k, prod[k]);
       }
     });
@@ -101,9 +140,8 @@ export function CrearProducto({ route }) {
     });
 
     setCargando(true);
-    let method = params ? "put" : "post";
     await fetch(`${axios.defaults.baseURL}/productos`, {
-      method,
+      method: "post",
       headers: {
         "Content-Type": "multipart/form-data",
         ...axios.defaults.headers, // token
@@ -118,10 +156,7 @@ export function CrearProducto({ route }) {
       stock: 0,
       imagenes: [],
     });
-    Alert.alert(
-      "Ferreteria Movil",
-      `Producto ${method == "post" ? "creado" : "actualizado"} con exito`
-    );
+    Alert.alert("Ferreteria Movil", `Producto creado con exito`);
 
     setCargando(false);
   }
@@ -132,7 +167,8 @@ export function CrearProducto({ route }) {
       prod.stock &&
       prod.nombre &&
       prod.imagenes.length &&
-      prod.categoriaFk
+      prod.categoriaFk &&
+      !compareObjs(prod, prodCopy)
     ) {
       setReady(true);
       return;
@@ -145,6 +181,7 @@ export function CrearProducto({ route }) {
   }
   useEffect(() => {
     if (params) {
+      setProdCopy({ ...params, categoriaFk: params.categoria.id });
       setProd({ ...params, categoriaFk: params.categoria.id });
       setCategoria(params.categoria);
     }
@@ -399,7 +436,7 @@ export function CrearProducto({ route }) {
           bottom: 20,
           right: 10,
         }}
-        onPress={subirProducto}
+        onPress={params ? updateProd : subirProducto}
         disabled={!ready}
       />
     </>

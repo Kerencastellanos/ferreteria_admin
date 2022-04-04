@@ -37,6 +37,7 @@ export function Tabsmenu() {
       />
       <Tabs.Screen
         options={{
+          headerTitle: "Crear Producto",
           tabBarIcon: ({ size, color }) => (
             <AntDesign name="pluscircleo" size={size} color={color} />
           ),

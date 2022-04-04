@@ -33,9 +33,19 @@ export function Productos({ navigation }) {
       setMaxReached(true);
       return;
     }
+
     setProductos([...productos, ...data]);
     // paginacion proxima solicitud seran los siguientes 10 productos
     setInicio(inicio + cantidad);
+  }
+  async function refreshProds() {
+    setCargando(true);
+    const { data } = await axios.get("/productos");
+    setCargando(false);
+    console.log(data);
+    setProductos(data);
+    setMaxReached(false);
+    setInicio(10);
   }
   return (
     <View style={{ flex: 1 }}>
@@ -43,7 +53,7 @@ export function Productos({ navigation }) {
         onEndReached={solicitarProductos}
         onEndReachedThreshold={0.1}
         refreshing={cargando}
-        onRefresh={solicitarProductos}
+        onRefresh={refreshProds}
         contentContainerStyle={{ padding: 10 }}
         data={productos}
         keyExtractor={(item) => item.id}
