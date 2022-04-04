@@ -54,10 +54,6 @@ export function Login({ navigation, route }) {
         password={true}
       />
 
-      <TouchableOpacity onPress={irARecuperarClave}>
-        <Text style={styles.txt}>¿Olvido su contraseña?</Text>
-      </TouchableOpacity>
-
       <TouchableOpacity style={styles.btn} onPress={enviarDatos}>
         <Text style={styles.btnText}>Ingresar</Text>
       </TouchableOpacity>
