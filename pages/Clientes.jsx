@@ -40,6 +40,8 @@ export function Clientes({ navigation }) {
   useEffect(() => {
     obtenerClientes();
   }, []);
+
+  // relacionado con la barra de busqueda
   /**
    * @type {React.MutableRefObject<TextInput>}
    */
@@ -94,6 +96,8 @@ export function Clientes({ navigation }) {
   useLayoutEffect(() => {
     setDefaultHeaderTitle();
   }, []);
+  // relacionado con la barra de busqueda
+
   async function refreshUsuarios() {
     setCargando(true);
     const { data } = await axios.get("/usuarios");
@@ -130,11 +134,13 @@ export function Clientes({ navigation }) {
         data={usuarios}
         onEndReached={obtenerClientes}
         onEndReachedThreshold={0.1}
-        ListEmptyComponent={() => (
-          <Text style={{ textAlign: "center" }}>
-            No se encontraron Usuarios con el argumento "{argumento}"
-          </Text>
-        )}
+        ListEmptyComponent={() =>
+          !cargando ? (
+            <Text style={{ textAlign: "center" }}>
+              No se encontraron Usuarios con el argumento "{argumento}"
+            </Text>
+          ) : null
+        }
         keyExtractor={(item) => item.id}
         ListFooterComponent={() =>
           cargando ? <ActivityIndicator size={"small"} /> : null
